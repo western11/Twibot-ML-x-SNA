@@ -1,0 +1,124 @@
+---
+title: "Untitled"
+author: "Joe"
+date: "8/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r,warning=FALSE,message=FALSE}
+library(httr)
+library(rtweet)
+library(tidyverse)
+```
+
+```{r}
+bearer <- "Bearer AAAAAAAAAAAAAAAAAAAAABM1EQEAAAAAbCMVBnMAxhaVV%2BgioL3IZ9%2FRERE%3DFjbeVnOcecMtweoVO4uYhL4EKbWaeEONUmzz9RScvBX7THIRLp"
+```
+
+```{r}
+# api endpoint
+user <- "joechristianp"
+users_url = "https://api.twitter.com/1.1/users/show.json?screen_name="
+statuses_url = "https://api.twitter.com/1.1/statuses/user_timeline.json?screen_name="
+search_url = "https://api.twitter.com/1.1/search/tweets.json?q=%40"
+opts = "&count=200&include_rts=true"
+opts2 = "&count=100&include_rts=true"
+```
+
+```{r}
+# value caller
+# API call to get user
+userdata = GET(paste0(users_url,user,opts), 
+              add_headers(Authorization = bearer))
+
+# API call to get tweets
+tweets = GET(paste0(statuses_url,user,opts), 
+             add_headers(Authorization = bearer))
+
+# API call to get mentions
+mentions = GET(paste0(search_url,user,opts2), 
+               add_headers(Authorization = bearer))
+
+# convert to list
+body = list(
+  timeline = content(tweets, type="application/json"),
+  mentions = content(mentions, type="application/json"),
+  user = content(userdata, type="application/json")
+)
+```
+
+```{r}
+# Convert to JSON
+body_json <-  RJSONIO::toJSON(body, auto_unbox = T, pretty = T)
+
+# Make the API request
+result <- POST(url = "https://botometer-pro.p.rapidapi.com/4/check_account",
+     encode = "json",
+     add_headers(`x-rapidapi-key` = "a71c4b5b96msh7bf4c93e35cc979p130934jsn0b3f0705716c",
+                 `x-rapidapi-host` = "botometer-pro.p.rapidapi.com"),
+     body = body_json)
+
+result <- content(result, as = "parsed")
+result$display_scores$universal$overall
+
+lasttw <- result$user$user_data$status$created_at %>% 
+  str_split(pattern = " ") %>% unlist()
+
+paste(lasttw[2],lasttw[3],lasttw[6],lasttw[4]) %>% 
+  mdy_hms()
+
+result$user$user_data$favourites_count
+
+result$display_scores %>% 
+  unlist() %>% as.data.frame() %>% 
+  setNames("value") %>% 
+  mutate(variable = rownames(.)) %>% 
+  mutate(cat = ifelse(str_detect(variable,"english"),"english","universal")) %>% 
+  mutate(varname = str_replace_all(variable,paste(cat,".",sep = ""),"")) %>% 
+  select(varname, cat, value) %>% 
+  `rownames<-`(NULL) %>% 
+  filter(cat == "english") %>% 
+  filter(varname == "overall") %>% 
+  pull(value)
+
+
+```
+
+un```{r}
+result$display_scores
+
+unlist(result) %>% 
+  t() %>% 
+  as.data.frame()
+```
+
+
+
+
+```{r}
+library(c3)
+result$display_scores$universal$overall %>% data.frame() %>% 
+  c3() %>% c3_gauge(min = 0,max = 5,label = "textt")
+```
+
+```{r}
+library(echarts4r)
+e_charts() %>% 
+  e_gauge(result$display_scores$universal$overall,
+          "NUMERIC",min = 0,max= 5)
+
+```
+
+
+
+
+
+ref:
+[botometer](https://rapidapi.com/OSoMe/api/botometer-pro?utm_source=google&utm_medium=cpc&utm_campaign=Beta&utm_term=%2Bbotometer_b&gclid=CjwKCAjwsNiIBhBdEiwAJK4khhX2g87541LVAI6JPyTD4yY_ZynIB0da9omz-N0PjVJ6U0QecCk5-hoCSmMQAvD_BwE)
+
+[bslib](https://www.r-bloggers.com/2021/01/shiny-1-6/)
+
