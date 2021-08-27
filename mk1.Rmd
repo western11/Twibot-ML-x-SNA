@@ -16,7 +16,7 @@ library(tidyverse)
 ```
 
 ```{r}
-bearer <- "Bearer AAAAAAAAAAAAAAAAAAAAABM1EQEAAAAAbCMVBnMAxhaVV%2BgioL3IZ9%2FRERE%3DFjbeVnOcecMtweoVO4uYhL4EKbWaeEONUmzz9RScvBX7THIRLp"
+bearer <- "Bearer xxxx"
 ```
 
 ```{r}
@@ -58,7 +58,7 @@ body_json <-  RJSONIO::toJSON(body, auto_unbox = T, pretty = T)
 # Make the API request
 result <- POST(url = "https://botometer-pro.p.rapidapi.com/4/check_account",
      encode = "json",
-     add_headers(`x-rapidapi-key` = "a71c4b5b96msh7bf4c93e35cc979p130934jsn0b3f0705716c",
+     add_headers(`x-rapidapi-key` = "xxxxx",
                  `x-rapidapi-host` = "botometer-pro.p.rapidapi.com"),
      body = body_json)
 

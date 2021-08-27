@@ -21,6 +21,7 @@ statuses_url = "https://api.twitter.com/1.1/statuses/user_timeline.json?screen_n
 search_url = "https://api.twitter.com/1.1/search/tweets.json?q=%40"
 opts = "&count=200&include_rts=true"
 opts2 = "&count=100&include_rts=true"
+bearer <- "Bearer xxxx"
 
 
 boter <- function(x){
@@ -49,7 +50,7 @@ boter <- function(x){
   # Make the API request
   result <- POST(url = "https://botometer-pro.p.rapidapi.com/4/check_account",
                  encode = "json",
-                 add_headers(`x-rapidapi-key` = "a71c4b5b96msh7bf4c93e35cc979p130934jsn0b3f0705716c",
+                 add_headers(`x-rapidapi-key` = "xxxx",
                              `x-rapidapi-host` = "botometer-pro.p.rapidapi.com"),
                  body = body_json)
   
